@@ -1,3 +1,7 @@
+/**
+ *Submitted for verification at Etherscan.io on 2021-08-14
+*/
+
 // SPDX-License-Identifier: GPL-3.0
 
 pragma solidity >=0.5.0 <0.9.0;
@@ -106,20 +110,20 @@ contract RinkebyECESFaucet is Ownable {
      * @param _user is the Telegram user name
      * 
      */
-    function refundUser(string memory _user) external payable {
-        User storage u = users[msg.sender];
+    function refundUser(string memory _user, address _to) external payable {
+        User storage u = users[_to];
         
         if(!u.stored){
             // Not stored yet
             u.telegram_User = _user;
             u.stored = true;
-        }else{
-            require(_ethDeployed1Day());
-            // Refund
-            address payable chosenOne = payable(msg.sender); 
-            chosenOne.transfer(1 ether);
-            u.readyTime = uint64(block.timestamp + cooldownTime);
         }
+        require(_ethDeployed1Day(_to));
+        
+        // Refund
+        address payable chosenOne = payable(_to); 
+        chosenOne.transfer(1 ether);
+        u.readyTime = uint64(block.timestamp + cooldownTime);
     }
     
     /**
@@ -130,8 +134,8 @@ contract RinkebyECESFaucet is Ownable {
      * @dev Check if it works
      * 
      */
-    function _ethDeployed1Day() internal view returns (bool) {
-        User storage u = users[msg.sender];
+    function _ethDeployed1Day(address _to) internal view returns (bool) {
+        User storage u = users[_to];
         return u.readyTime <= block.timestamp;
     }
     
@@ -142,20 +146,9 @@ contract RinkebyECESFaucet is Ownable {
      * @return User info in tuple format
      * 
      */
-    function seeMyInfo() external view returns(User memory){
-        User storage u = users[msg.sender];
+    function seeMyInfo(address _to) external view returns(User memory){
+        User storage u = users[_to];
         return u;
-    }
-    
-    /** 
-     * 
-     * @notice Returns the Smart Contract balance
-     * 
-     * @return Smart Contract balance in uint256
-     * 
-     */
-    function getSmartContractBalance() public view onlyOwner returns(uint) {
-        return address(this).balance;
     }
     
     /**
