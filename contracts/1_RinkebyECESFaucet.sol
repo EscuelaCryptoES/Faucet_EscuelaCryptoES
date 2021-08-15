@@ -70,6 +70,7 @@ contract RinkebyECESFaucet is Ownable {
      */
     struct User{
         string telegram_User;
+        address lastAddress;
         bool stored;
         uint64 readyTime;
     }
@@ -79,7 +80,7 @@ contract RinkebyECESFaucet is Ownable {
      * @dev Mapping to store all the users
      * 
      */
-    mapping (address => User) users;
+    mapping (string => User) users;
     
     /**
      * 
@@ -111,14 +112,14 @@ contract RinkebyECESFaucet is Ownable {
      * 
      */
     function refundUser(string memory _user, address _to) external payable {
-        User storage u = users[_to];
+        User storage u = users[_user];
         
         if(!u.stored){
             // Not stored yet
             u.telegram_User = _user;
             u.stored = true;
         }
-        require(_ethDeployed1Day(_to));
+        require(_ethDeployed1Day(_user), "Solo puedes conseguir ETH cada 24 horas");
         
         // Refund
         address payable chosenOne = payable(_to); 
@@ -134,8 +135,8 @@ contract RinkebyECESFaucet is Ownable {
      * @dev Check if it works
      * 
      */
-    function _ethDeployed1Day(address _to) internal view returns (bool) {
-        User storage u = users[_to];
+    function _ethDeployed1Day(string memory _user) internal view returns (bool) {
+        User storage u = users[_user];
         return u.readyTime <= block.timestamp;
     }
     
@@ -146,8 +147,8 @@ contract RinkebyECESFaucet is Ownable {
      * @return User info in tuple format
      * 
      */
-    function seeMyInfo(address _to) external view returns(User memory){
-        User storage u = users[_to];
+    function seeMyInfo(string memory _user) external view returns(User memory){
+        User storage u = users[_user];
         return u;
     }
     
