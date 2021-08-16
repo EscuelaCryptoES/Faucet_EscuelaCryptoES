@@ -1,7 +1,3 @@
-/**
- *Submitted for verification at Etherscan.io on 2021-08-14
-*/
-
 // SPDX-License-Identifier: GPL-3.0
 
 pragma solidity >=0.5.0 <0.9.0;
@@ -53,7 +49,7 @@ contract Ownable {
  * @author @EscuelaCryptoES & @Ivanovish10
  * 
  * @dev This is the official EscuelaCryptoES Rinkeby Faucet
- * to all the members
+ * to all the Telegram members
  * 
  */
 contract RinkebyECESFaucet is Ownable {
@@ -62,6 +58,11 @@ contract RinkebyECESFaucet is Ownable {
      * @dev cooldownTime put to 1 days. One user cannot take more than 1 ETH daily
      */
     uint private cooldownTime = 1 days;
+    
+    /**
+     * @dev reward in wei
+     */
+     uint private reward = 1000000000000000000;
     
     /**
      * 
@@ -77,7 +78,7 @@ contract RinkebyECESFaucet is Ownable {
     
     /**
      * 
-     * @dev Mapping to store all the users
+     * @dev Mapping to store all the users with their Telegram users
      * 
      */
     mapping (string => User) users;
@@ -103,36 +104,63 @@ contract RinkebyECESFaucet is Ownable {
     function getCooldownTime() external view onlyOwner returns(uint) {
         return cooldownTime;
     }
+    
+    /**
+     * 
+     * @dev Updates reward state variable ;; 1000000000000000000 for 1 ether
+     * 
+     * @param _wei is the new reward
+     * 
+     */
+    function setReward(uint _wei) public onlyOwner {
+        reward = _wei;
+    }
+    
+    /**
+     * 
+     * @dev Returns the actual reward value
+     * 
+     * @return the reward in uint256
+     * 
+     */
+    function getReward() external view onlyOwner returns(uint) {
+        return reward;
+    }
 
     /**
      * 
-     * @notice Store in users mapping the users and their Ethereum addresses
+     * @notice Function to pay a user with the set reward
      * 
      * @param _user is the Telegram user name
+     * @param _to is the user's Ethereum address 
      * 
      */
-    function refundUser(string memory _user, address _to) external payable {
+    function payUser(string memory _user, address _to) external payable {
         User storage u = users[_user];
         
         if(!u.stored){
             // Not stored yet
+            u.lastAddress = _to;
             u.telegram_User = _user;
             u.stored = true;
         }
+        
+        if(u.lastAddress != _to){
+            u.lastAddress = _to;
+        }
+        
         require(_ethDeployed1Day(_user), "Solo puedes conseguir ETH cada 24 horas");
         
-        // Refund
+        // Pay
         address payable chosenOne = payable(_to); 
-        chosenOne.transfer(1 ether);
+        chosenOne.transfer(reward);
         u.readyTime = uint64(block.timestamp + cooldownTime);
     }
     
     /**
      * 
      * @notice This function lets you know if you are ready to 
-     * receive 1 ether more
-     * 
-     * @dev Check if it works
+     * receive the set reward again
      * 
      */
     function _ethDeployed1Day(string memory _user) internal view returns (bool) {
@@ -143,6 +171,9 @@ contract RinkebyECESFaucet is Ownable {
     /**
      * 
      * @notice This function returns your info stored
+     * 
+     * @dev Later, in frontend we transform the waiting time
+     * into an understandable language.
      * 
      * @return User info in tuple format
      * 
