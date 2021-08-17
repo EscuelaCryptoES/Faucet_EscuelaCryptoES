@@ -8,7 +8,7 @@ var app = express();
 
 app.use(bodyParser.json());
 
-web3js = new web3(new web3.providers.HttpProvider("https://rinkeby.infura.io/v3/312c66c4c0c8493d9ec03e13553c83d4"));
+web3js = new web3(new web3.providers.HttpProvider("YOUR_INFURA_KEY_HERE"));
 
 app.use(function(req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");
@@ -29,7 +29,7 @@ app.post("/post", (req, res) => {
   //if (ethAddress != Ethereum Address Format || ethAddress == '')
 
   var myAddress = '0x0f5f332B08f5A6D975b12FAdea0C74B622270B0B';
-  var privateKey = Buffer.from('b3a7648ee2b2068ede09f6de261b6a9fbc7df22fa7347664809a1aaf31b403a6', 'hex')
+  var privateKey = Buffer.from('YOUR_PRIVATE_KEY_HERE', 'hex')
   //var toAddress = '0x3356328f46BaB773804e3a6C28828aA09Cee2feD';
 
   //contract abi is the array that you can get from the ethereum wallet or etherscan

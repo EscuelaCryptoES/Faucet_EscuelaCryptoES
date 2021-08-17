@@ -25,3 +25,6 @@ Finally, on a new terminal, go to the repository's client/demo folder and run th
 npm install
 npm start
 ```
+
+With the code open, you'll also have to modify the app.js, and add your infura endpoint aswell as you ETH address and private key.
+If you redeploy the contract you need to change the contract address aswell.
